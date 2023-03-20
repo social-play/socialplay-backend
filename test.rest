@@ -1,0 +1,49 @@
+@url = http://localhost:4820
+
+### GET BASE
+{{url}}
+
+### GET RegisterForm
+GET {{url}}/registers
+
+
+### POST RegisterForm
+POST {{url}}/register
+Content-Type: application/json
+
+{
+    "userName":"asdasda",
+    "password":"asdaQ123?",
+    "firstName":"asda",
+    "lastName":"asdasd",
+    "birthDate":"15-15-2015",
+    "email":"sammanab89@gmail.com"
+}
+
+### GOOD LOGIN
+POST {{url}}/login
+Content-Type: application/json
+
+{
+    "userName":"Ahmed",
+    "password":"aasd1AA?"
+}
+
+### BAD LOGIN
+POST {{url}}/login
+Content-Type: application/json
+
+{
+    "userName":"Ahmed",
+    "password":"asd?"
+   
+}
+
+### logout
+GET {{url}}/logout
+ 
+ 
+
+### GET CUrrent
+
+GET {{url}}/current-user
