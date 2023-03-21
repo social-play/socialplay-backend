@@ -102,7 +102,7 @@ const logAnonymousUserIn = async (
       currentUser: user,
     });
   } else {
-    res.status(500).send("bad login");
+    res.status(401).send("username or Password incorrect");
   }
 };
 

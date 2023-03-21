@@ -14,6 +14,7 @@ const registerForm = new mongoose.Schema(
     accessGroups: [String],
     confirmationCode: String,
     isOver16: Boolean,
+    capture: String,
   },
 
   { versionKey: false }

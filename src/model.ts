@@ -4,6 +4,7 @@ import sgMail from "@sendgrid/mail";
 import { Users } from "./models/Users";
 import bcrypt from "bcrypt";
 import * as tools from "./tools";
+import express, { Request, Response } from "express";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -55,6 +56,10 @@ export const sendRegisterForm = async (userForm: IUser) => {
     errors.push("Please confirm that you are over 16 years");
   }
 
+  if (userForm.capture === "") {
+    errors.push("Please fill the correct answer in capture");
+  }
+
   if (errors.length > 0) {
     console.log("error erwischt", errors);
 
@@ -83,10 +88,11 @@ export const sendRegisterForm = async (userForm: IUser) => {
     }
   }
 };
-// type of req, res
 // const loginSecondsMax = 10;
-
-// export const logAnonymousUserIn = async (req, res) => {
+// export const logAnonymousUserIn = async (
+//   req: express.Request,
+//   res: express.Response
+// ) => {
 //   const user = await Users.findOne({ userName: "anonymousUser" });
 //   if (user) {
 //     req.session.user = user;
@@ -103,12 +109,14 @@ export const sendRegisterForm = async (userForm: IUser) => {
 // export const logUserIn = async (
 //   userName: string,
 //   password: string,
-//   req,
-//   res
+//   req: express.Request,
+//   res: express.Response
 // ) => {
 //   const user = await Users.findOne({ userName });
+
 //   if (user) {
 //     const passwordIsCorrect = await bcrypt.compare(password, user.hash);
+
 //     if (passwordIsCorrect) {
 //       req.session.user = user;
 //       req.session.cookie.expires = new Date(

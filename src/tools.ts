@@ -4,13 +4,13 @@ export const getRandomConfirmationCode = () => {
   return crypto.randomBytes(10).toString("hex");
 };
 
-export const passwordValidation = (userPassword: string) => {
+const passwordValidation = (userPassword: string) => {
   const regex = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=?]).{8,}$/;
 
   return regex.test(userPassword);
 };
 
-export const emailValidation = (userEmail: string) => {
+const emailValidation = (userEmail: string) => {
   return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(userEmail);
 };
 
