@@ -51,6 +51,10 @@ export const sendRegisterForm = async (userForm: IUser) => {
     errors.push("username already exists");
   }
 
+  if (userForm.isOver16 === false) {
+    errors.push("Please confirm that you are over 16 years");
+  }
+
   if (errors.length > 0) {
     console.log("error erwischt", errors);
 

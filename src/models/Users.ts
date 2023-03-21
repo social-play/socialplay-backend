@@ -6,13 +6,14 @@ const registerForm = new mongoose.Schema(
     hash: String,
     firstName: String,
     lastName: String,
-    birthDate: String,
+
     email: {
       type: String,
       lowerCase: true,
     },
     accessGroups: [String],
     confirmationCode: String,
+    isOver16: Boolean,
   },
 
   { versionKey: false }
