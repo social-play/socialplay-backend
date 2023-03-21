@@ -39,11 +39,16 @@ export const sendRegisterForm = async (userForm: IUser) => {
     }
   }
   // check if user is already registered
-  const existingUser = await Users.findOne({ email: userForm.email });
-  console.log("exist?", existingUser);
+  const existingUserEmail = await Users.findOne({ email: userForm.email });
 
-  if (existingUser) {
+  if (existingUserEmail) {
     errors.push("User with this email already exists");
+  }
+
+  const existingUserName = await Users.findOne({ userName: userForm.userName });
+
+  if (existingUserName) {
+    errors.push("username already exists");
   }
 
   if (errors.length > 0) {
