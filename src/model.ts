@@ -55,14 +55,11 @@ export const sendRegisterForm = async (userForm: IUser) => {
   if (userForm.isOver16 === false) {
     errors.push("Please confirm that you are over 16 years");
   }
-
-  if (userForm.capture === "") {
-    errors.push("Please fill the correct answer in capture");
+  if (userForm.captcha === false) {
+    errors.push("Please enter the correct result of the captcha");
   }
 
   if (errors.length > 0) {
-    console.log("error erwischt", errors);
-
     return {
       status: tools.validations.status,
       errors,

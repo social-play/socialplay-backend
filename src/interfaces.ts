@@ -3,7 +3,7 @@ export interface IUser {
   firstName: string;
   lastName: string;
   isOver16: boolean;
-  capture: string;
+  captcha: boolean;
   email: string;
   password: string;
   accessGroups: [string];
