@@ -1,15 +1,16 @@
 import mongoose from "mongoose";
-import { IUser } from "./interfaces";
+import { IGamePost, IUser } from "./interfaces";
 import sgMail from "@sendgrid/mail";
 import { Users } from "./models/Users";
 import bcrypt from "bcrypt";
 import * as tools from "./tools";
-import express, { Request, Response } from "express";
+import express from "express";
 import dotenv from "dotenv";
+import { GamesPosts } from "./models/GamesPosts";
 dotenv.config();
 
 const MONGODB_CONNECTION =
-  process.env.MONGODB_CONNECTION || "mongodb://localhost/register";
+  process.env.MONGODB_CONNECTION || "mongodb://localhost/final-project";
 mongoose.set("strictQuery", false);
 mongoose.connect(MONGODB_CONNECTION);
 
@@ -30,11 +31,11 @@ export const sendRegisterForm = async (userForm: IUser) => {
     if (validation.validator) {
       const isValid = validation.validator(value);
       if (!isValid) {
-        console.log("email / password < 2 ", validation.message);
+        //console.log("email / password < 2 ", validation.message);
         errors.push(validation.message);
       }
     } else if (value.length < 2) {
-      console.log("length < 2 ", validation.message);
+      //console.log("length < 2 ", validation.message);
 
       errors.push(validation.message);
     }
@@ -75,7 +76,7 @@ export const sendRegisterForm = async (userForm: IUser) => {
         confirmationCode,
         accessGroups: ["loggedInUsers", "unconfirmedMembers"],
       });
-      //const sendUserForm = await Users.create(userForm);
+
       // save user to db
       user.save();
       sendEmailToUser(userForm, confirmationCode);
@@ -85,51 +86,70 @@ export const sendRegisterForm = async (userForm: IUser) => {
     }
   }
 };
-// const loginSecondsMax = 10;
-// export const logAnonymousUserIn = async (
-//   req: express.Request,
-//   res: express.Response
-// ) => {
-//   const user = await Users.findOne({ userName: "anonymousUser" });
-//   if (user) {
-//     req.session.user = user;
-//     req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
-//     req.session.save();
-//     res.send({
-//       currentUser: user,
-//     });
-//   } else {
-//     res.status(500).send("bad login");
-//   }
-// };
+const loginSecondsMax = 10;
+export const logAnonymousUserIn = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const user = await Users.findOne({ userName: "anonymousUser" });
+  if (user) {
+    req.session.user = user;
+    req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
+    req.session.save();
+    res.send({
+      currentUser: user,
+    });
+  } else {
+    res.status(500).send("bad login");
+  }
+};
 
-// export const logUserIn = async (
-//   userName: string,
-//   password: string,
-//   req: express.Request,
-//   res: express.Response
-// ) => {
-//   const user = await Users.findOne({ userName });
+export const logUserIn = async (
+  userName: string,
+  password: string,
+  req: express.Request,
+  res: express.Response
+) => {
+  const user = await Users.findOne({ userName });
 
-//   if (user) {
-//     const passwordIsCorrect = await bcrypt.compare(password, user.hash);
+  if (user) {
+    const passwordIsCorrect = await bcrypt.compare(password, user.hash);
 
-//     if (passwordIsCorrect) {
-//       req.session.user = user;
-//       req.session.cookie.expires = new Date(
-//         Date.now() + loginSecondsMax * 1000
-//       );
-//       req.session.save();
-//       res.send({
-//         currentUser: user,
-//       });
-//     } else {
-//       logAnonymousUserIn(req, res);
-//     }
-//   } else {
-//     logAnonymousUserIn(req, res);
-//   }
-// };
+    if (passwordIsCorrect) {
+      req.session.user = user;
+      req.session.cookie.expires = new Date(
+        Date.now() + loginSecondsMax * 1000
+      );
+      req.session.save();
+      res.send({
+        currentUser: user,
+      });
+    } else {
+      logAnonymousUserIn(req, res);
+    }
+  } else {
+    logAnonymousUserIn(req, res);
+  }
+};
+
+// hacker
+export const protectSiteFromHacking = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  try {
+    const users = await Users.find();
+    const numberOfUsersInData = users.length;
+    if (numberOfUsersInData > 20) {
+      res.status(500).send("hacker protection: too many users in database");
+    } else {
+      next();
+    }
+  } catch (e) {
+    res.status(500).send("no access: something went wrong in ensureSafeOrigin");
+  }
+};
 
 // send mail to user
 export const sendEmailToUser = (userForm: IUser, confirmationCode: string) => {
@@ -158,4 +178,64 @@ export const sendEmailToUser = (userForm: IUser, confirmationCode: string) => {
     .catch((error) => {
       console.error(error);
     });
+};
+
+// GamesPosts
+
+export const getAllGamePosts = async () => {
+  const gamePosts = await GamesPosts.find();
+  return gamePosts;
+};
+
+export const getGamesPost = async (id: string) => {
+  try {
+    const book = await GamesPosts.findOne({ _id: id });
+
+    return book;
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
+};
+
+export const addGamesPost = async (gamesPost: IGamePost) => {
+  try {
+    const newGamesPost = await GamesPosts.create(gamesPost);
+    return { newId: newGamesPost._id, newGamesPost };
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
+};
+
+export const editGamesPost = async (id: string, oldGamesPost: IGamePost) => {
+  try {
+    const oldPost = await GamesPosts.find({ _id: id });
+    await GamesPosts.updateOne({ _id: id }, { $set: { ...oldGamesPost } });
+    const newOne = await GamesPosts.find({ _id: id });
+    return { oldPost, newOne };
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
+};
+
+export const deleteGamesPost = async (_id: string) => {
+  try {
+    const deleteGamesPost = await GamesPosts.deleteOne({ _id });
+
+    return `${deleteGamesPost} with ${_id} has been deleted`;
+  } catch (error) {
+    throw new Error(`${error.message}`);
+  }
+};
+
+export const authorizeUser = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const user = await Users.findOne({ userName: "anonymousUser" });
+  if (req.session.user === user) {
+    next();
+  } else {
+    res.status(401).send({});
+  }
 };

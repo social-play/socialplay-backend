@@ -3,7 +3,7 @@ import * as model from "./model";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { IUser } from "./interfaces";
+import { IGamePost, IUser } from "./interfaces";
 import dotenv from "dotenv";
 import bcrypt from "bcrypt";
 import { Users } from "./models/Users";
@@ -27,6 +27,7 @@ app.use(
     credentials: true,
   })
 );
+
 app.use(
   session({
     resave: true,
@@ -58,23 +59,6 @@ app.get("/registers", async (req: express.Request, res: express.Response) => {
     res.status(500).send(error);
   }
 });
-const protectSiteFromHacking = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-  try {
-    const users = await Users.find();
-    const numberOfUsersInData = users.length;
-    if (numberOfUsersInData > 20) {
-      res.status(500).send("hacker protection: too many users in database");
-    } else {
-      next();
-    }
-  } catch (e) {
-    res.status(500).send("no access: something went wrong in ensureSafeOrigin");
-  }
-};
 
 const loginSecondsMax = 10;
 
@@ -89,50 +73,50 @@ muss ein object in db mit anonymousUser definiert
 }
 */
 
-const logAnonymousUserIn = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  const user = await Users.findOne({ userName: "anonymousUser" });
-  if (user) {
-    req.session.user = user;
-    req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
-    req.session.save();
-    res.send({
-      currentUser: user,
-    });
-  } else {
-    res.status(401).send("username or Password incorrect");
-  }
-};
+// const logAnonymousUserIn = async (
+//   req: express.Request,
+//   res: express.Response
+// ) => {
+//   const user = await Users.findOne({ userName: "anonymousUser" });
+//   if (user) {
+//     req.session.user = user;
+//     req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
+//     req.session.save();
+//     res.send({
+//       currentUser: user,
+//     });
+//   } else {
+//     res.status(401).send("username or Password incorrect");
+//   }
+// };
 
-const logUserIn = async (
-  userName: string,
-  password: string,
-  req: express.Request,
-  res: express.Response
-) => {
-  const user = await Users.findOne({ userName });
+// const logUserIn = async (
+//   userName: string,
+//   password: string,
+//   req: express.Request,
+//   res: express.Response
+// ) => {
+//   const user = await Users.findOne({ userName });
 
-  if (user) {
-    const passwordIsCorrect = await bcrypt.compare(password, user.hash);
+//   if (user) {
+//     const passwordIsCorrect = await bcrypt.compare(password, user.hash);
 
-    if (passwordIsCorrect) {
-      req.session.user = user;
-      req.session.cookie.expires = new Date(
-        Date.now() + loginSecondsMax * 1000
-      );
-      req.session.save();
-      res.send({
-        currentUser: user,
-      });
-    } else {
-      logAnonymousUserIn(req, res);
-    }
-  } else {
-    logAnonymousUserIn(req, res);
-  }
-};
+//     if (passwordIsCorrect) {
+//       req.session.user = user;
+//       req.session.cookie.expires = new Date(
+//         Date.now() + loginSecondsMax * 1000
+//       );
+//       req.session.save();
+//       res.send({
+//         currentUser: user,
+//       });
+//     } else {
+//       logAnonymousUserIn(req, res);
+//     }
+//   } else {
+//     logAnonymousUserIn(req, res);
+//   }
+// };
 
 app.post(
   "/login",
@@ -141,7 +125,7 @@ app.post(
     try {
       const userName = req.body?.userName;
       const password = req.body?.password;
-      logUserIn(userName, password, req, res);
+      model.logUserIn(userName, password, req, res);
     } catch (error) {
       res.status(500).send("no access: something went wrong");
     }
@@ -150,7 +134,7 @@ app.post(
 
 app.post(
   "/register",
-  protectSiteFromHacking,
+  model.protectSiteFromHacking,
   async (req: express.Request, res: express.Response) => {
     const userForm: IUser = req.body;
 
@@ -167,13 +151,13 @@ app.get("/current-user", (req: express.Request, res: express.Response) => {
         currentUser: user,
       });
     } else {
-      logAnonymousUserIn(req, res);
+      model.logAnonymousUserIn(req, res);
     }
   }, 0); // increase to test initial backend delay
 });
 
 app.get("/logout", (req: express.Request, res: express.Response) => {
-  logAnonymousUserIn(req, res);
+  model.logAnonymousUserIn(req, res);
 });
 
 app.post(
@@ -193,6 +177,77 @@ app.post(
       res.send({ userWasConfirmed: true });
     } else {
       res.send({ userWasConfirmed: false });
+    }
+  }
+);
+
+// GamesPosts
+
+app.get("/gamesPosts", async (req: express.Request, res: express.Response) => {
+  try {
+    const result = await model.getAllGamePosts();
+
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(500).send(error);
+  }
+});
+
+app.get(
+  "/gamesPost/:id",
+  async (req: express.Request, res: express.Response) => {
+    const id = req.params.id;
+    try {
+      const result = await model.getGamesPost(id);
+      res
+        .status(200)
+        .json({ message: `fetched gamespost with id ${id}`, result });
+    } catch (error) {
+      res.status(401).send(error.message);
+    }
+  }
+);
+
+app.post(
+  "/gamesPost",
+  //model.authorizeUser,
+  async (req: express.Request, res: express.Response) => {
+    const gamesPost = req.body;
+    try {
+      res.status(200).json(await model.addGamesPost(gamesPost));
+    } catch (error) {
+      res.status(401).send(error.message);
+    }
+  }
+);
+
+app.delete(
+  "/gamesPost/:id",
+  //model.authorizeUser,
+  async (req: express.Request, res: express.Response) => {
+    const _id = req.params.id;
+    try {
+      res.status(200).json(await model.deleteGamesPost(_id));
+    } catch (error) {
+      res.status(401).send(error.message);
+    }
+  }
+);
+
+app.patch(
+  "/gamesPost/:id",
+  //model.authorizeUser,
+  async (req: express.Request, res: express.Response) => {
+    const id = req.params.id;
+    const gamesPost: IGamePost = req.body;
+    try {
+      const result = await model.editGamesPost(id, gamesPost);
+      res.status(200).json({
+        oldGamesPost: result.oldPost,
+        result: result.newOne,
+      });
+    } catch (error) {
+      res.status(401).send(error.message);
     }
   }
 );

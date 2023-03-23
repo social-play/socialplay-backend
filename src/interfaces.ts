@@ -8,3 +8,12 @@ export interface IUser {
   password: string;
   accessGroups: [string];
 }
+
+export interface IGamePost {
+  title: string;
+  description: string;
+  numberOfPages: number;
+  language: string;
+  imageUrl: string;
+  buyUrl: string;
+}
