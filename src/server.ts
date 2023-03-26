@@ -4,9 +4,10 @@ import session from "express-session";
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import { IGamePost, IUser } from "./interfaces";
-import dotenv from "dotenv";
-import bcrypt from "bcrypt";
 import { Users } from "./models/Users";
+import bcrypt from "bcrypt";
+
+import dotenv from "dotenv";
 dotenv.config();
 
 declare module "express-session" {
@@ -60,7 +61,32 @@ app.get("/registers", async (req: express.Request, res: express.Response) => {
   }
 });
 
-const loginSecondsMax = 10;
+// // multer
+
+// app.post('/uploadfile', model.upload.single('file'), async (req, res) => {
+//   await db.read();
+//   const fileName = req.body.fileName;
+//   let iconPathAndFileName = '';
+//   if (fileName.endsWith('.xlsx')) {
+//       iconPathAndFileName = 'uploadedFiles/general/iconExcel.png';
+//   } else if (fileName.endsWith('.json')) {
+//       iconPathAndFileName = 'uploadedFiles/general/iconJson.png';
+//   } else if (fileName.endsWith('.txt')) {
+//       iconPathAndFileName = 'uploadedFiles/general/iconText.png';
+//   } else {
+//       iconPathAndFileName = `uploadedFiles/${fileName}`
+//   }
+
+//   db.data.fileItems.push({
+//       title: req.body.title,
+//       description: req.body.description,
+//       notes: req.body.notes,
+//       fileName: req.body.fileName,
+//       iconPathAndFileName
+//   });
+//   await db.write();
+//   res.json({});
+// });
 
 /* 
 muss ein object in db mit anonymousUser definiert
@@ -73,59 +99,63 @@ muss ein object in db mit anonymousUser definiert
 }
 */
 
-// const logAnonymousUserIn = async (
-//   req: express.Request,
-//   res: express.Response
-// ) => {
-//   const user = await Users.findOne({ userName: "anonymousUser" });
-//   if (user) {
-//     req.session.user = user;
-//     req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
-//     req.session.save();
-//     res.send({
-//       currentUser: user,
-//     });
-//   } else {
-//     res.status(401).send("username or Password incorrect");
-//   }
-// };
+const loginSecondsMax = 100;
+export const logAnonymousUserIn = async (
+  req: express.Request,
+  res: express.Response
+) => {
+  const user = await Users.findOne({ userName: "anonymousUser" });
+  if (user) {
+    req.session.user = user;
+    req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
+    req.session.save();
+    res.send({
+      currentUser: user,
+    });
+  } else {
+    res.status(500).send("bad login");
+  }
+};
 
-// const logUserIn = async (
-//   userName: string,
-//   password: string,
-//   req: express.Request,
-//   res: express.Response
-// ) => {
-//   const user = await Users.findOne({ userName });
+export const logUserIn = async (
+  userName: string,
+  password: string,
+  req: express.Request,
+  res: express.Response
+) => {
+  const user = await Users.findOne({ userName });
 
-//   if (user) {
-//     const passwordIsCorrect = await bcrypt.compare(password, user.hash);
+  if (user) {
+    const passwordIsCorrect = await bcrypt.compare(password, user.hash);
 
-//     if (passwordIsCorrect) {
-//       req.session.user = user;
-//       req.session.cookie.expires = new Date(
-//         Date.now() + loginSecondsMax * 1000
-//       );
-//       req.session.save();
-//       res.send({
-//         currentUser: user,
-//       });
-//     } else {
-//       logAnonymousUserIn(req, res);
-//     }
-//   } else {
-//     logAnonymousUserIn(req, res);
-//   }
-// };
+    if (passwordIsCorrect) {
+      req.session.user = user;
+
+      req.session.cookie.expires = new Date(
+        Date.now() + loginSecondsMax * 1000
+      );
+      req.session.save();
+      res.send({
+        currentUser: user,
+
+        userId: user._id, // id for updateUserProfile id
+      });
+    } else {
+      logAnonymousUserIn(req, res);
+    }
+  } else {
+    logAnonymousUserIn(req, res);
+  }
+};
 
 app.post(
   "/login",
 
   async (req: express.Request, res: express.Response) => {
     try {
-      const userName = req.body?.userName;
-      const password = req.body?.password;
-      model.logUserIn(userName, password, req, res);
+      const userName: string = req.body?.userName;
+      const password: string = req.body?.password;
+      logUserIn(userName, password, req, res);
     } catch (error) {
       res.status(500).send("no access: something went wrong");
     }
@@ -151,13 +181,13 @@ app.get("/current-user", (req: express.Request, res: express.Response) => {
         currentUser: user,
       });
     } else {
-      model.logAnonymousUserIn(req, res);
+      logAnonymousUserIn(req, res);
     }
   }, 0); // increase to test initial backend delay
 });
 
 app.get("/logout", (req: express.Request, res: express.Response) => {
-  model.logAnonymousUserIn(req, res);
+  logAnonymousUserIn(req, res);
 });
 
 app.post(
@@ -251,6 +281,28 @@ app.patch(
     }
   }
 );
+
+// userProfile
+app.patch(
+  "/userProfile/:id",
+  //model.authorizeUser,
+  async (req: express.Request, res: express.Response) => {
+    const id = req.params.id;
+    const currentUser: IUser = req.body;
+    try {
+      const result = await model.editUserProfile(id, currentUser);
+      req.session.user.firstName = currentUser.firstName;
+      req.session.user.lastName = currentUser.lastName;
+      res.status(200).json(result);
+    } catch (error) {
+      res.status(401).send(error.message);
+    }
+  }
+);
+
+app.get("*", (req: express.Request, res: express.Response) => {
+  res.status(404).send("route not found");
+});
 
 app.listen(port, () => {
   console.log(`server is running on http://localhost:${port}`);

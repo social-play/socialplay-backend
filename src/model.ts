@@ -5,8 +5,9 @@ import { Users } from "./models/Users";
 import bcrypt from "bcrypt";
 import * as tools from "./tools";
 import express from "express";
-import dotenv from "dotenv";
 import { GamesPosts } from "./models/GamesPosts";
+import multer from "multer";
+import dotenv from "dotenv";
 dotenv.config();
 
 const MONGODB_CONNECTION =
@@ -20,6 +21,16 @@ export const getRegisterForm = async () => {
   const registerForm = await Users.find();
   return registerForm;
 };
+// const storage = multer.diskStorage({
+//   destination: (req, file, cb) => {
+//     cb(null, "public/uploadedFiles/");
+//   },
+//   filename: (req, file, cb) => {
+//     cb(null, file.originalname);
+//   },
+// });
+
+// export const upload = multer({ storage: storage });
 
 export const sendRegisterForm = async (userForm: IUser) => {
   const errors = [];
@@ -84,51 +95,6 @@ export const sendRegisterForm = async (userForm: IUser) => {
     } catch (error) {
       return { status: "error", errors: ["no access --"] };
     }
-  }
-};
-const loginSecondsMax = 10;
-export const logAnonymousUserIn = async (
-  req: express.Request,
-  res: express.Response
-) => {
-  const user = await Users.findOne({ userName: "anonymousUser" });
-  if (user) {
-    req.session.user = user;
-    req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
-    req.session.save();
-    res.send({
-      currentUser: user,
-    });
-  } else {
-    res.status(500).send("bad login");
-  }
-};
-
-export const logUserIn = async (
-  userName: string,
-  password: string,
-  req: express.Request,
-  res: express.Response
-) => {
-  const user = await Users.findOne({ userName });
-
-  if (user) {
-    const passwordIsCorrect = await bcrypt.compare(password, user.hash);
-
-    if (passwordIsCorrect) {
-      req.session.user = user;
-      req.session.cookie.expires = new Date(
-        Date.now() + loginSecondsMax * 1000
-      );
-      req.session.save();
-      res.send({
-        currentUser: user,
-      });
-    } else {
-      logAnonymousUserIn(req, res);
-    }
-  } else {
-    logAnonymousUserIn(req, res);
   }
 };
 
@@ -237,5 +203,20 @@ export const authorizeUser = async (
     next();
   } else {
     res.status(401).send({});
+  }
+};
+
+export const editUserProfile = async (id: string, currentUser: IUser) => {
+  try {
+    await Users.updateOne(
+      { _id: id },
+      {
+        $set: {
+          ...currentUser,
+        },
+      }
+    );
+  } catch (error) {
+    throw new Error(`${error.message}`);
   }
 };

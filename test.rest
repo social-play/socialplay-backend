@@ -1,6 +1,9 @@
 @url = http://localhost:4987
 
 
+### GET bad Route
+{{url}}/asdqwe
+
 ### GET RegisterForm
 GET {{url}}/registers
 
