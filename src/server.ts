@@ -6,7 +6,9 @@ import cors from "cors";
 import { IGamePost, IUser } from "./interfaces";
 import { Users } from "./models/Users";
 import bcrypt from "bcrypt";
-
+import multer from "multer";
+import { join, dirname } from "path";
+import path from "path";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -28,6 +30,8 @@ app.use(
     credentials: true,
   })
 );
+
+// cookies
 
 app.use(
   session({
@@ -60,33 +64,6 @@ app.get("/registers", async (req: express.Request, res: express.Response) => {
     res.status(500).send(error);
   }
 });
-
-// // multer
-
-// app.post('/uploadfile', model.upload.single('file'), async (req, res) => {
-//   await db.read();
-//   const fileName = req.body.fileName;
-//   let iconPathAndFileName = '';
-//   if (fileName.endsWith('.xlsx')) {
-//       iconPathAndFileName = 'uploadedFiles/general/iconExcel.png';
-//   } else if (fileName.endsWith('.json')) {
-//       iconPathAndFileName = 'uploadedFiles/general/iconJson.png';
-//   } else if (fileName.endsWith('.txt')) {
-//       iconPathAndFileName = 'uploadedFiles/general/iconText.png';
-//   } else {
-//       iconPathAndFileName = `uploadedFiles/${fileName}`
-//   }
-
-//   db.data.fileItems.push({
-//       title: req.body.title,
-//       description: req.body.description,
-//       notes: req.body.notes,
-//       fileName: req.body.fileName,
-//       iconPathAndFileName
-//   });
-//   await db.write();
-//   res.json({});
-// });
 
 /* 
 muss ein object in db mit anonymousUser definiert
@@ -281,6 +258,29 @@ app.patch(
     }
   }
 );
+// multer upload picture
+const staticDirectory = path.join(__dirname, "../public");
+
+app.use(express.static(staticDirectory));
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/images");
+  },
+  filename: (req, file, cb) => {
+    const userId = req.params.id;
+    const originalName = file.originalname;
+    const fileExtension = originalName.split(".").pop();
+    const fileName = `${userId}.${fileExtension}`;
+    cb(null, fileName);
+  },
+});
+
+const upload = multer({ storage });
+
+app.post("/uploadFile/:id", upload.single("file"), async (req, res) => {
+  res.status(200).send("ok");
+});
 
 // userProfile
 app.patch(
@@ -293,6 +293,7 @@ app.patch(
       const result = await model.editUserProfile(id, currentUser);
       req.session.user.firstName = currentUser.firstName;
       req.session.user.lastName = currentUser.lastName;
+      req.session.user.email = currentUser.email;
       res.status(200).json(result);
     } catch (error) {
       res.status(401).send(error.message);
