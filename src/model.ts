@@ -6,7 +6,6 @@ import bcrypt from "bcrypt";
 import * as tools from "./tools";
 import express from "express";
 import { GamesPosts } from "./models/GamesPosts";
-import multer from "multer";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -21,16 +20,6 @@ export const getRegisterForm = async () => {
   const registerForm = await Users.find();
   return registerForm;
 };
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, "public/uploadedFiles/");
-//   },
-//   filename: (req, file, cb) => {
-//     cb(null, file.originalname);
-//   },
-// });
-
-// export const upload = multer({ storage: storage });
 
 export const sendRegisterForm = async (userForm: IUser) => {
   const errors = [];
@@ -90,6 +79,7 @@ export const sendRegisterForm = async (userForm: IUser) => {
 
       // save user to db
       user.save();
+
       sendEmailToUser(userForm, confirmationCode);
       return { status: "success", errors: [] };
     } catch (error) {
