@@ -268,17 +268,18 @@ const storage = multer.diskStorage({
     cb(null, "public/images");
   },
   filename: (req, file, cb) => {
-    const userId = req.params.id;
+    //const userId = req.params.id;
+    const userName = req.params.userName;
     const originalName = file.originalname;
     const fileExtension = originalName.split(".").pop();
-    const fileName = `${userId}.${fileExtension}`;
+    const fileName = `${userName}.${fileExtension}`;
     cb(null, fileName);
   },
 });
 
 const upload = multer({ storage });
 
-app.post("/uploadFile/:id", upload.single("file"), async (req, res) => {
+app.post("/uploadFile/:userName", upload.single("file"), async (req, res) => {
   res.status(200).send("ok");
 });
 

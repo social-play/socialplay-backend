@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import * as tools from "./tools";
 import express from "express";
 import { GamesPosts } from "./models/GamesPosts";
+import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -77,6 +78,15 @@ export const sendRegisterForm = async (userForm: IUser) => {
         accessGroups: ["loggedInUsers", "unconfirmedMembers"],
       });
 
+      fs.copyFile(
+        "./public/images/anonymousUser.png",
+        `./public/images/${userForm.userName}.png`,
+        (err) => {
+          if (err) throw err;
+          console.log("image not found");
+        }
+      );
+
       // save user to db
       user.save();
 
@@ -145,9 +155,9 @@ export const getAllGamePosts = async () => {
 
 export const getGamesPost = async (id: string) => {
   try {
-    const book = await GamesPosts.findOne({ _id: id });
+    const gamesPost = await GamesPosts.findOne({ _id: id });
 
-    return book;
+    return gamesPost;
   } catch (error) {
     throw new Error(`${error.message}`);
   }
