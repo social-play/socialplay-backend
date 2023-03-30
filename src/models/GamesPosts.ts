@@ -7,7 +7,8 @@ const gamesPosts = new mongoose.Schema(
     numberOfPages: Number,
     language: String,
     imageUrl: String,
-    buyUrl: String,
+    console: String,
+    game: String,
   },
 
   { versionKey: false }
