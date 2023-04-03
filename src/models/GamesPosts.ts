@@ -4,7 +4,9 @@ const gamesPosts = new mongoose.Schema(
   {
     title: String,
     description: String,
-    numberOfPages: Number,
+    weOffer: String,
+    contact: String,
+    numberOfPlayers: Number,
     language: String,
     imageUrl: String,
     console: String,
