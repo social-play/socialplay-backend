@@ -12,7 +12,7 @@ export interface IUser {
 
 export interface IGamePost {
   title: string;
-  description: string;
+  WeSearch: string;
   numberOfPages: number;
   language: string;
   imageUrl: string;
