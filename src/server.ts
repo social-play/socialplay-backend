@@ -7,10 +7,12 @@ import { IGamePost, IUser } from "./interfaces";
 import { Users } from "./models/Users";
 import bcrypt from "bcrypt";
 import multer from "multer";
-import { join, dirname } from "path";
 import path from "path";
 import dotenv from "dotenv";
 dotenv.config();
+//socket.io
+import http from "http";
+import { Server } from "socket.io";
 
 declare module "express-session" {
   export interface SessionData {
@@ -30,6 +32,32 @@ app.use(
     credentials: true,
   })
 );
+// socket.io
+const httpServer = http.createServer(app);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"],
+  },
+});
+
+io.on("connection", (socket) => {
+  console.log(`User Connected: ${socket.id}`);
+
+  socket.on("join_room", (data) => {
+    socket.join(data);
+    console.log(`User with ID: ${socket.id} joined room: ${data}`);
+  });
+
+  socket.on("send_message", (data) => {
+    socket.to(data.room).emit("receive_message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User Disconnected", socket.id);
+  });
+});
 
 // cookies
 
@@ -306,6 +334,6 @@ app.get("*", (req: express.Request, res: express.Response) => {
   res.status(404).send("route not found");
 });
 
-app.listen(port, () => {
+httpServer.listen(port, () => {
   console.log(`server is running on http://localhost:${port}`);
 });

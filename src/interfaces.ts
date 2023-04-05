@@ -11,7 +11,7 @@ export interface IUser {
 }
 
 export interface IGamePost {
-  title: string;
+  roomId: string;
   WeSearch: string;
   numberOfPages: number;
   language: string;
