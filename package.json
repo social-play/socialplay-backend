@@ -5,8 +5,10 @@
   "main": "index.js",
   "scripts": {
     "dev": "nodemon",
-    "start": "npm run build && nodemon",
-    "build": "tsc"
+    "build": "tsc --build",
+    "start": "node dist/server.js",
+    "setup": "npm i && npm run build && pm2 start --name socialplay-backend npm -- start --update-env --time && pm2 save",
+    "deploy": "git pull --no-rebase && npm run build && pm2 restart socialplay-backend --update-env --time && pm2 save"
   },
   "nodemonConfig": {
     "watch": [
