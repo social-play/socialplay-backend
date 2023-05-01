@@ -243,9 +243,22 @@ app.get(
   }
 );
 
+const authorizeUser = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  const user = await Users.findOne({ userName: "anonymousUser" });
+  if (req.session.user === user) {
+    next();
+  } else {
+    res.status(401).send({});
+  }
+};
+
 app.post(
   "/gamesPost",
-  //model.authorizeUser,
+  authorizeUser,
   async (req: express.Request, res: express.Response) => {
     const gamesPost = req.body;
     try {
@@ -258,7 +271,7 @@ app.post(
 
 app.delete(
   "/gamesPost/:id",
-  //model.authorizeUser,
+  authorizeUser,
   async (req: express.Request, res: express.Response) => {
     const _id = req.params.id;
     try {
@@ -271,7 +284,7 @@ app.delete(
 
 app.patch(
   "/gamesPost/:id",
-  //model.authorizeUser,
+  authorizeUser,
   async (req: express.Request, res: express.Response) => {
     const id = req.params.id;
     const gamesPost: IGamePost = req.body;
@@ -314,7 +327,7 @@ app.post("/uploadFile/:userName", upload.single("file"), async (req, res) => {
 // userProfile
 app.patch(
   "/userProfile/:id",
-  //model.authorizeUser,
+  authorizeUser,
   async (req: express.Request, res: express.Response) => {
     const id = req.params.id;
     const currentUser: IUser = req.body;
