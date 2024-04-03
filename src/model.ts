@@ -55,7 +55,7 @@ export const sendRegisterForm = async (userForm: IUser) => {
   }
 
   if (userForm.isOver16 === false) {
-    errors.push("Please confirm that you are over 16 years");
+    errors.push("Please confirm over 16 years");
   }
   if (userForm.captcha === false) {
     errors.push("Please enter the correct result of the captcha");
