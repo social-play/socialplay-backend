@@ -12,6 +12,7 @@ const gamesPosts = new mongoose.Schema(
     console: String,
     game: String,
     author: String,
+
   },
 
   { versionKey: false }

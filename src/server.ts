@@ -13,6 +13,9 @@ dotenv.config();
 //socket.io
 import http from "http";
 import { Server } from "socket.io";
+import { GamesPosts } from "./models/GamesPosts";
+
+
 
 declare module "express-session" {
   export interface SessionData {
@@ -93,7 +96,7 @@ app.get("/registers", async (req: express.Request, res: express.Response) => {
   }
 });
 
-/* 
+/*
 muss ein object in db mit anonymousUser definiert
 
 {
@@ -104,7 +107,8 @@ muss ein object in db mit anonymousUser definiert
 }
 */
 
-const loginSecondsMax = 100;
+const loginSecondsMaxAnonymous = 100;
+const loginSecondsMax = 1000;
 export const logAnonymousUserIn = async (
   req: express.Request,
   res: express.Response
@@ -112,7 +116,7 @@ export const logAnonymousUserIn = async (
   const user = await Users.findOne({ userName: "anonymousUser" });
   if (user) {
     req.session.user = user;
-    req.session.cookie.expires = new Date(Date.now() + loginSecondsMax * 1000);
+    req.session.cookie.expires = new Date(Date.now() + loginSecondsMaxAnonymous * 1000);
     req.session.save();
     res.send({
       currentUser: user,
@@ -135,6 +139,7 @@ export const logUserIn = async (
 
     if (passwordIsCorrect) {
       req.session.user = user;
+//console.log("correct",passwordIsCorrect);
 
       req.session.cookie.expires = new Date(
         Date.now() + loginSecondsMax * 1000
@@ -147,9 +152,11 @@ export const logUserIn = async (
       });
     } else {
       logAnonymousUserIn(req, res);
+     // console.log("anonymous",passwordIsCorrect);
     }
   } else {
     logAnonymousUserIn(req, res);
+   // console.log("false");
   }
 };
 
@@ -243,18 +250,61 @@ app.get(
   }
 );
 
+// const authorizeUser = async (
+//   req: express.Request,
+//   res: express.Response,
+//   next: express.NextFunction
+// ) => {
+
+//   const user = await Users.findOne({ userName: "anonymousUser" });
+//   if (req.session.user === user) {
+//     next();
+//   } else {
+//     res.status(401).send({});
+//   }
+// };
+
+// andere lösung
 const authorizeUser = async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
-  const user = await Users.findOne({ userName: "anonymousUser" });
-  if (req.session.user === user) {
+  try {
+    // Überprüfe, ob ein Benutzer in der Sitzung gespeichert ist
+    if (!req.session.user) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
+
+    // Finde den Benutzer in der Datenbank basierend auf der Benutzer-ID aus der Sitzung
+    const user = await Users.findById(req.session.user._id);
+ const post = await GamesPosts.findById(req.params.id)
+
+    // Überprüfe, ob der Benutzer gefunden wurde
+    if (!user) {
+      return res.status(401).send({ message: "Unauthorized" });
+    }
+
+    // Vergleiche den gefundenen Benutzer mit dem Benutzer aus der Sitzung
+    if (user.userName === "anonymousUser") {
+
+      return res.status(401).send({ message: "Unauthorized" });
+    }
+    // vergleiche postAuthor mit userName und verhindere die post methode
+    if(req.method==="DELETE" || req.method==="PATCH"){
+
+      if(user.userName!==post.author){
+        return res.status(401).send({ message: "Unauthorized" });
+      }
+    }
+
     next();
-  } else {
-    res.status(401).send({});
+  } catch (error) {
+    console.error("Authorization error:", error);
+    res.status(500).send({ message: "Internal Server Error" });
   }
 };
+
 
 app.post(
   "/gamesPost",
