@@ -38,7 +38,7 @@ export const validations = {
     {
       field: "email",
       validator: emailValidation,
-      message: "Please enter a valid email , e.g. name@example.com",
+      message: "Please enter a valid email, e.g. name@example.com",
     },
   ],
 };
