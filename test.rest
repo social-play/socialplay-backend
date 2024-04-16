@@ -1,0 +1,85 @@
+@url = http://localhost:4987
+
+
+### GET bad Route
+{{url}}/asdqwe
+
+### GET RegisterForm
+GET {{url}}/registers
+
+
+### POST RegisterForm
+POST {{url}}/register
+Content-Type: application/json
+
+{
+    "userName":"asdasda",
+    "password":"asdaQ123?",
+    "firstName":"asda",
+    "lastName":"asdasd",
+    "birthDate":"15-15-2015",
+    "email":"sammanab89@gmail.com"
+}
+
+### GOOD LOGIN
+POST {{url}}/login
+Content-Type: application/json
+
+{
+    "userName":"Ahmed",
+    "password":"aasd1AA?"
+}
+
+### BAD LOGIN
+POST {{url}}/login
+Content-Type: application/json
+
+{
+    "userName":"Ahmed",
+    "password":"asd?"
+   
+}
+
+### logout
+GET {{url}}/logout
+ 
+ 
+
+### GET CUrrent
+GET {{url}}/current-user
+
+
+### GET GamePosts
+GET {{url}}/gamesposts
+
+
+
+### PATCH GamesPost
+PATCH {{url}}/gamesPost/641b16acb9f08ec85891c79e
+content-type: application/json
+
+{
+"title": "The Age of American asdasd",
+"description": "Having grown up in America and having lived in Berlin, Germany for over two decades, I have noticed a rift between the two cultures in terms of the average level of *Bildung* (education and cultivation), and since I am raising two American/German children who are growing up in the German culture, I am reading this book to better understand the causes for the higher degree of anti-intellectualism, consumerism, scientific ignorance, and religious superstition that is found in American society.",
+"imageUrl": "http://edwardtanguay.vercel.app/share/images/books/unreason.png",
+"buyUrl": "http://www.amazon.com/The-American-Unreason-Susan-Jacoby/dp/1400096383",
+"language":"english"
+}
+
+### POST GamesPost
+POST {{url}}/gamesPost
+content-type: application/json
+
+
+{
+"title": "The Age of American Unreason552asd",
+"description": "Having grown up in America and having lived in Berlin, Germany for over two decades, I have noticed a rift between the two cultures in terms of the average level of *Bildung* (education and cultivation), and since I am raising two American/German children who are growing up in the German culture, I am reading this book to better understand the causes for the higher degree of anti-intellectualism, consumerism, scientific ignorance, and religious superstition that is found in American society.",
+"imageUrl": "http://edwardtanguay.vercel.app/share/images/books/unreason.png",
+"buyUrl": "http://www.amazon.com/The-American-Unreason-Susan-Jacoby/dp/1400096383",
+"language":"english"
+}
+
+
+
+### DELETE GamesPost
+DELETE {{url}}/gamesPost/641b16acb9f08ec85891c79e
