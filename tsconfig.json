@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "module": "NodeNext",
-    "moduleResolution": "NodeNext",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
     "target": "ES2020",
     "sourceMap": true,
     "outDir": "dist",
@@ -10,5 +10,5 @@
     "lib": ["esnext"],
     "esModuleInterop": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*.ts"]
 }
