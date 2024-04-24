@@ -15,7 +15,6 @@ import http from "http";
 import { Server } from "socket.io";
 import { GamesPosts } from "./models/GamesPosts";
 
-//
 
 declare module "express-session" {
   export interface SessionData {
