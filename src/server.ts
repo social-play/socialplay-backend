@@ -1,10 +1,10 @@
 import express from "express";
-import * as model from "./model";
+import * as model from "./model.js";
 import session from "express-session";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import { IGamePost, IUser } from "./interfaces";
-import { Users } from "./models/Users";
+import { IGamePost, IUser } from "./interfaces.js";
+import { Users } from "./models/Users.js";
 import bcrypt from "bcrypt";
 import multer from "multer";
 import path from "path";
@@ -13,7 +13,7 @@ dotenv.config();
 //socket.io
 import http from "http";
 import { Server } from "socket.io";
-import { GamesPosts } from "./models/GamesPosts";
+import { GamesPosts } from "./models/GamesPosts.js";
 
 
 declare module "express-session" {

@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { IGamePost, IUser } from "./interfaces";
+import { IGamePost, IUser } from "./interfaces.js";
 import sgMail from "@sendgrid/mail";
-import { Users } from "./models/Users";
+import { Users } from "./models/Users.js";
 import bcrypt from "bcrypt";
-import * as tools from "./tools";
+import * as tools from "./tools.js";
 import express from "express";
-import { GamesPosts } from "./models/GamesPosts";
+import { GamesPosts } from "./models/GamesPosts.js";
 import fs from "fs";
 import dotenv from "dotenv";
 dotenv.config();
