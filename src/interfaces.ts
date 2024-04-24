@@ -9,7 +9,6 @@ export interface IUser {
   password: string;
   accessGroups: [string];
 }
-
 export interface IGamePost {
   roomId: string;
   WeSearch: string;
