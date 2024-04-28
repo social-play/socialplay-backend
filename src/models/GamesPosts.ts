@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const gamesPosts = new mongoose.Schema(
   {
+
     roomId: String,
     WeSearch: String,
     weOffer: String,

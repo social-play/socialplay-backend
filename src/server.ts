@@ -249,62 +249,75 @@ app.get(
   }
 );
 
-// const authorizeUser = async (
-//   req: express.Request,
-//   res: express.Response,
-//   next: express.NextFunction
-// ) => {
-
-//   const user = await Users.findOne({ userName: "anonymousUser" });
-//   if (req.session.user === user) {
-//     next();
-//   } else {
-//     res.status(401).send({});
-//   }
-// };
-
-// andere lösung
 const authorizeUser = async (
   req: express.Request,
   res: express.Response,
   next: express.NextFunction
 ) => {
-  try {
-    // Überprüfe, ob ein Benutzer in der Sitzung gespeichert ist
-    if (!req.session.user) {
-      return res.status(401).send({ message: "Unauthorized" });
-    }
 
-    // Finde den Benutzer in der Datenbank basierend auf der Benutzer-ID aus der Sitzung
-    const user = await Users.findById(req.session.user._id);
-    const post = await GamesPosts.findById(req.params.id)
+  const anonymousUser = await Users.findOne({ userName: "anonymousUser" });
+  const userId = await Users.findById(req.session.user._id);
 
-    // Überprüfe, ob der Benutzer gefunden wurde
-    if (!user) {
-      return res.status(401).send({ message: "Unauthorized" });
-    }
+console.log(anonymousUser.userName);
 
-    // Vergleiche den gefundenen Benutzer mit dem Benutzer aus der Sitzung
-    if (user.userName === "anonymousUser") {
-
-      return res.status(401).send({ message: "please confirm your email" });
-    }
-    // vergleiche postAuthor mit userName und verhindere die post methode
-    if(req.method==="DELETE" || req.method==="PATCH" || req.method==="PUT"){
-
-      if(user.userName!==post.author){
+if (userId.userName === anonymousUser.userName) {
         return res.status(401).send({ message: "Unauthorized" });
-      }
-    }
-  next();
+}
+// if (!req.session.user) {
+//     return res.status(401).send({ message: "Unauthorized" });
+// }
+     //console.log("session",req.session.user);
+  if (req.session.user !== anonymousUser) {
 
-  console.log("user",user);
-  console.log("post",post);
-  } catch (error) {
-    console.error("Authorization error:", error);
-    res.status(500).send({ message: "Internal Server Error" });
+    next();
   }
+
+  else {
+    res.status(401).send({});
+  }
+
 };
+
+// andere lösung
+// const authorizeUser = async (
+//   req: express.Request,
+//   res: express.Response,
+//   next: express.NextFunction
+// ) => {
+//   try {
+//     // Überprüfe, ob ein Benutzer in der Sitzung gespeichert ist
+//     if (!req.session.user) {
+//       return res.status(401).send({ message: "Unauthorized" });
+//     }
+
+//     // Finde den Benutzer in der Datenbank basierend auf der Benutzer-ID aus der Sitzung
+//     const user = await Users.findById(req.session.user._id);
+//     const postId = await GamesPosts.findOne({});
+
+//     // Überprüfe, ob der Benutzer gefunden wurde
+//     if (!user) {
+//       return res.status(401).send({ message: "Unauthorized" });
+//     }
+
+//     // Vergleiche den gefundenen Benutzer mit dem Benutzer aus der Sitzung
+//     if (user.userName === "anonymousUser") {
+
+//       return res.status(401).send({ message: "Unauthorized" });
+//     }
+//     // vergleiche postAuthor mit userName und verhindere die post methode
+//     if(req.method==="DELETE" || req.method==="PATCH"){
+
+//       if(user.userName!==postId.author){
+//         return res.status(401).send({ message: "Unauthorized" });
+//       }
+//     }
+//     next();
+
+//   } catch (error) {
+//     console.error("Authorization error:", error);
+//     res.status(500).send({ message: "Internal Server Error" });
+//   }
+// };
 
 
 app.post(
@@ -335,7 +348,7 @@ app.delete(
 
 app.patch(
   "/gamesPost/:id",
-  authorizeUser,
+
   async (req: express.Request, res: express.Response) => {
     const id = req.params.id;
     const gamesPost: IGamePost = req.body;
@@ -378,7 +391,7 @@ app.post("/uploadFile/:userName", upload.single("file"), async (req, res) => {
 // userProfile
 app.patch(
   "/userProfile/:id",
-  authorizeUser,
+
   async (req: express.Request, res: express.Response) => {
     const id = req.params.id;
     const currentUser: IUser = req.body;
