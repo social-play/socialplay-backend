@@ -295,14 +295,8 @@ const authorizeUser = async (
       if(user.userName!==post.author){
         return res.status(401).send({ message: "Unauthorized" });
       }
-    }else {
-          res.status(401).send({});
-   }
-    next();
-
-
-
-
+    }
+  next();
 
   console.log("user",user);
   console.log("post",post);
