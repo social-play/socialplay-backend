@@ -277,7 +277,7 @@ const authorizeUser = async (
 
     // Finde den Benutzer in der Datenbank basierend auf der Benutzer-ID aus der Sitzung
     const user = await Users.findById(req.session.user._id);
- const post = await GamesPosts.findById(req.params.id)
+    const post = await GamesPosts.findById(req.params.id)
 
     // Überprüfe, ob der Benutzer gefunden wurde
     if (!user) {
@@ -290,14 +290,16 @@ const authorizeUser = async (
       return res.status(401).send({ message: "Unauthorized" });
     }
     // vergleiche postAuthor mit userName und verhindere die post methode
-    if(req.method==="DELETE" || req.method==="PATCH"){
+    if(req.method==="DELETE" || req.method==="PATCH" || req.method==="PUT"){
 
       if(user.userName!==post.author){
         return res.status(401).send({ message: "Unauthorized" });
       }
     }
+else{
 
-    next();
+  next();
+}
   } catch (error) {
     console.error("Authorization error:", error);
     res.status(500).send({ message: "Internal Server Error" });
