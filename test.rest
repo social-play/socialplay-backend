@@ -1,4 +1,4 @@
-@url = http://localhost:4987
+@url = http://localhost:5969
 
 
 ### GET bad Route
@@ -13,8 +13,8 @@ POST {{url}}/register
 Content-Type: application/json
 
 {
-    "userName":"asdasda",
-    "password":"asdaQ123?",
+    "userName":"ABIDAL",
+    "password":"Soc12345?",
     "firstName":"asda",
     "lastName":"asdasd",
     "birthDate":"15-15-2015",
@@ -37,13 +37,13 @@ Content-Type: application/json
 {
     "userName":"Ahmed",
     "password":"asd?"
-   
+
 }
 
 ### logout
 GET {{url}}/logout
- 
- 
+
+
 
 ### GET CUrrent
 GET {{url}}/current-user

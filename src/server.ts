@@ -287,7 +287,7 @@ const authorizeUser = async (
     // Vergleiche den gefundenen Benutzer mit dem Benutzer aus der Sitzung
     if (user.userName === "anonymousUser") {
 
-      return res.status(401).send({ message: "Unauthorized" });
+      return res.status(401).send({ message: "please confirm your email" });
     }
     // vergleiche postAuthor mit userName und verhindere die post methode
     if(req.method==="DELETE" || req.method==="PATCH" || req.method==="PUT"){
@@ -295,11 +295,17 @@ const authorizeUser = async (
       if(user.userName!==post.author){
         return res.status(401).send({ message: "Unauthorized" });
       }
-    }
-else{
+    }else {
+          res.status(401).send({});
+   }
+    next();
 
-  next();
-}
+
+
+
+
+  console.log("user",user);
+  console.log("post",post);
   } catch (error) {
     console.error("Authorization error:", error);
     res.status(500).send({ message: "Internal Server Error" });
