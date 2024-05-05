@@ -28,7 +28,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "https://socialplay.netlify.app",
+    origin: process.env.FRONTEND_BASE_URL,
     methods: ["POST", "GET", "PATCH", "DELETE"],
     credentials: true,
   })
@@ -298,8 +298,10 @@ const adminUser= req.session.user.userName;
     if(adminUser === anonymousUser.userName){
     return res.status(401).send({ message: "Unauthorized" });
     }
+if(adminUser !== undefined){
 
   next();
+}
 };
 
 app.post(
