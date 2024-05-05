@@ -248,62 +248,59 @@ app.get(
   }
 );
 
-const authorizeUser = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-
-  const userAnony = await Users.findOne({ userName: "anonymousUser" });
-  const user = await Users.findOne({ userName: req.session.user.userName });
-  if (user !== userAnony) {
-    next();
-  } else {
-    res.status(401).send({});
-  }
-};
-
-// andere lösung
 // const authorizeUser = async (
 //   req: express.Request,
 //   res: express.Response,
 //   next: express.NextFunction
 // ) => {
 
-//   // Überprüfen, ob ein Benutzer in der Sitzung vorhanden ist
+//   const user = await Users.findOne({ userName: "anonymousUser" });
 
-//   if (!req.session.user) {
-//     return res.status(401).send({ message: "Unauthorized" });
+
+//   if (req.session.user === user) {
+//     next();
+//   } else {
+
+//     res.status(401).send({});
 //   }
-
-//   // Überprüfe, ob der Benutzer in der Datenbank existiert
-
-//   const user = await Users.findOne({ userName: req.session.user.userName });
-
-//   // Überprüfen, ob der Benutzer in der Datenbank existiert
-//   if (!user) {
-//     // Wenn der Benutzer nicht in der Datenbank gefunden wurde, ist die Sitzung ungültig
-//     req.session.destroy((err) => {
-//       if (err) {
-//         console.error("Error destroying session:", err);
-//       }
-//     });
-//     return res.status(401).send({ message: "Unauthorized" });
-//   }
-
-
-//     if(req.session.user.userName == "anonymousUser"){
-
-
-//     return res.status(401).send({ message: "Unauthorized" });
-//     }
-
-//   // Wenn alles in Ordnung, setze den Benutzer in der Anfrage fort
-
-//   //req.session.user.userName === user;
-
-//   next();
 // };
+
+// andere lösung
+const authorizeUser = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+
+  // Überprüfen, ob ein Benutzer in der Sitzung vorhanden ist
+  const anonymousUser = await Users.findOne({ userName: "anonymousUser" });
+const adminUser= req.session.user.userName;
+  console.log("user1",req.session.user);
+  console.log("user2",anonymousUser.userName);
+  console.log("user3",adminUser);
+
+  if (!req.session.user) {
+    return res.status(401).send({ message: "Unauthorized" });
+  }
+
+
+  // Überprüfen, ob der Benutzer in der Datenbank existiert
+  if (!adminUser) {
+    // Wenn der Benutzer nicht in der Datenbank gefunden wurde, ist die Sitzung ungültig
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+      }
+    });
+    return res.status(401).send({ message: "Unauthorized" });
+  }
+
+    if(adminUser === anonymousUser.userName){
+    return res.status(401).send({ message: "Unauthorized" });
+    }
+
+  next();
+};
 
 app.post(
   "/gamesPost",
