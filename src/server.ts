@@ -256,10 +256,10 @@ const authorizeUser = async (
 
   const userAnony = await Users.findOne({ userName: "anonymousUser" });
   const user = await Users.findOne({ userName: req.session.user.userName });
-  if (user === userAnony) {
-    return res.status(401).send({ message: "Unauthorized" });
-  } else {
+  if (user !== userAnony) {
     next();
+  } else {
+    res.status(401).send({});
   }
 };
 
