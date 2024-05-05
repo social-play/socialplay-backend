@@ -288,7 +288,6 @@ const authorizeUser = async (
     return res.status(401).send({ message: "Unauthorized" });
   }
 
-  // Hier können Sie weitere Berechtigungsprüfungen durchführen, z.B. über Benutzerrollen oder Berechtigungsstufen
 
     if(req.session.user.userName == "anonymousUser"){
     return res.status(401).send({ message: "Unauthorized" });
