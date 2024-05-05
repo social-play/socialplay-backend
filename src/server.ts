@@ -249,76 +249,56 @@ app.get(
   }
 );
 
-const authorizeUser = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
-
-  const anonymousUser = await Users.findOne({ userName: "anonymousUser" });
-  const userId = await Users.findById(req.session.user._id);
-
-console.log(anonymousUser.userName);
-
-if (userId.userName === anonymousUser.userName) {
-        return res.status(401).send({ message: "Unauthorized" });
-}
-// if (!req.session.user) {
-//     return res.status(401).send({ message: "Unauthorized" });
-// }
-     //console.log("session",req.session.user);
-  if (req.session.user !== anonymousUser) {
-
-    next();
-  }
-
-  else {
-    res.status(401).send({});
-  }
-
-};
-
-// andere lösung
 // const authorizeUser = async (
 //   req: express.Request,
 //   res: express.Response,
 //   next: express.NextFunction
 // ) => {
-//   try {
-//     // Überprüfe, ob ein Benutzer in der Sitzung gespeichert ist
-//     if (!req.session.user) {
-//       return res.status(401).send({ message: "Unauthorized" });
-//     }
 
-//     // Finde den Benutzer in der Datenbank basierend auf der Benutzer-ID aus der Sitzung
-//     const user = await Users.findById(req.session.user._id);
-//     const postId = await GamesPosts.findOne({});
-
-//     // Überprüfe, ob der Benutzer gefunden wurde
-//     if (!user) {
-//       return res.status(401).send({ message: "Unauthorized" });
-//     }
-
-//     // Vergleiche den gefundenen Benutzer mit dem Benutzer aus der Sitzung
-//     if (user.userName === "anonymousUser") {
-
-//       return res.status(401).send({ message: "Unauthorized" });
-//     }
-//     // vergleiche postAuthor mit userName und verhindere die post methode
-//     if(req.method==="DELETE" || req.method==="PATCH"){
-
-//       if(user.userName!==postId.author){
-//         return res.status(401).send({ message: "Unauthorized" });
-//       }
-//     }
+//   const user = await Users.findOne({ userName: "anonymousUser" });
+//   if (req.session.user === user) {
 //     next();
-
-//   } catch (error) {
-//     console.error("Authorization error:", error);
-//     res.status(500).send({ message: "Internal Server Error" });
+//   } else {
+//     res.status(401).send({});
 //   }
 // };
 
+// andere lösung
+const authorizeUser = async (
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction
+) => {
+  // Überprüfen, ob ein Benutzer in der Sitzung vorhanden ist
+  if (!req.session.user) {
+    return res.status(401).send({ message: "Unauthorized" });
+  }
+
+
+  const user = await Users.findOne({ userName: req.session.user.userName });
+
+  // Überprüfen, ob der Benutzer in der Datenbank existiert
+  if (!user) {
+    // Wenn der Benutzer nicht in der Datenbank gefunden wurde, ist die Sitzung ungültig
+    req.session.destroy((err) => {
+      if (err) {
+        console.error("Error destroying session:", err);
+      }
+    });
+    return res.status(401).send({ message: "Unauthorized" });
+  }
+
+  // Hier können Sie weitere Berechtigungsprüfungen durchführen, z.B. über Benutzerrollen oder Berechtigungsstufen
+
+    if(req.session.user.userName == "anonymousUser"){
+    return res.status(401).send({ message: "Unauthorized" });
+    }
+
+  // Wenn alles in Ordnung, setzen Sie den Benutzer in der Anfrage fort
+  req.session.user = user;
+
+  next();
+};
 
 app.post(
   "/gamesPost",
@@ -348,7 +328,7 @@ app.delete(
 
 app.patch(
   "/gamesPost/:id",
-
+  authorizeUser,
   async (req: express.Request, res: express.Response) => {
     const id = req.params.id;
     const gamesPost: IGamePost = req.body;
