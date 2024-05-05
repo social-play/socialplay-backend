@@ -296,7 +296,7 @@ const authorizeUser = async (
   // Wenn alles in Ordnung, setze den Benutzer in der Anfrage fort
 
 
-  req.session.user.userName = user;
+  req.session.user.userName === user;
 
   next();
 };
