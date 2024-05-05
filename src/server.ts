@@ -293,8 +293,10 @@ const authorizeUser = async (
     return res.status(401).send({ message: "Unauthorized" });
     }
 
-  // Wenn alles in Ordnung, setzen Sie den Benutzer in der Anfrage fort
-  req.session.user = user;
+  // Wenn alles in Ordnung, setze den Benutzer in der Anfrage fort
+
+
+  req.session.user.userName = user;
 
   next();
 };
