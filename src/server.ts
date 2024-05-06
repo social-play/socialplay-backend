@@ -38,7 +38,7 @@ const httpServer = http.createServer(app);
 
 const io = new Server(httpServer, {
   cors: {
-    origin: "*",
+    origin: process.env.FRONT_BASE_URL,
     methods: ["GET", "POST"],
   },
 });
