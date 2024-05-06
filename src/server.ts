@@ -75,11 +75,20 @@ app.use(
     },
   })
 );
+// app.all("/", function (req, res, next) {
+//   res.header("Access-Control-Allow-Origin", `${process.env.FRONTEND_BASE_URL}`);
+//   res.header("Access-Control-Allow-Headers", "X-Requested-With");
+//   next();
+// });
+
 app.all("/", function (req, res, next) {
   res.header("Access-Control-Allow-Origin", `${process.env.FRONTEND_BASE_URL}`);
-  res.header("Access-Control-Allow-Headers", "X-Requested-With");
+  res.header('Access-Control-Allow-Methods', 'GET, POST');
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  res.header('Access-Control-Allow-Credentials', 'true');
   next();
 });
+
 
 app.get("/", (req: express.Request, res: express.Response) => {
   res.status(500).send("no access -- 222");
