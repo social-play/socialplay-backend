@@ -267,7 +267,7 @@ const authorizeUser = async (
   const user = await Users.findOne({ userName: "anonymousUser" });
 
 
-  if (req.session.user === user) {
+  if (req.session.user !== user) {
     next();
   } else {
 
