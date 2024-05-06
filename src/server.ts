@@ -274,6 +274,8 @@ const authorizeUser = async (
 
 
   if (!req.session.user) {
+    console.log("kein req.session.user");
+
     return res.status(401).send({ message: "Unauthorized" });
   }
 
@@ -282,11 +284,15 @@ const authorizeUser = async (
   const adminUser= req.session.user.userName;
 
   if(adminUser===anonymousUser.userName){
+    console.log("ist gleich?");
+
     return res.status(401).send({message: "Unauthorized"})
   }
 
   // Überprüfen, ob der Benutzer in der Datenbank existiert
   if (!adminUser) {
+    console.log("was da hier los?");
+
     // Wenn der Benutzer nicht in der Datenbank gefunden wurde, ist die Sitzung ungültig
     req.session.destroy((err) => {
       if (err) {
