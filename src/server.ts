@@ -272,17 +272,18 @@ const authorizeUser = async (
   next: express.NextFunction
 ) => {
 
-  // Überprüfen, ob ein Benutzer in der Sitzung vorhanden ist
-  const anonymousUser = await Users.findOne({ userName: "anonymousUser" });
-const adminUser= req.session.user.userName;
-  console.log("user1",req.session.user);
-  console.log("user2",anonymousUser.userName);
-  console.log("user3",adminUser);
 
   if (!req.session.user) {
     return res.status(401).send({ message: "Unauthorized" });
   }
 
+  // Überprüfen, ob ein Benutzer in der Sitzung vorhanden ist
+  const anonymousUser = await Users.findOne({ userName: "anonymousUser" });
+  const adminUser= req.session.user.userName;
+
+  if(adminUser===anonymousUser){
+    return res.status(401).send({message: "Unauthorized"})
+  }
 
   // Überprüfen, ob der Benutzer in der Datenbank existiert
   if (!adminUser) {
@@ -295,13 +296,9 @@ const adminUser= req.session.user.userName;
     return res.status(401).send({ message: "Unauthorized" });
   }
 
-    if(adminUser === anonymousUser.userName){
-    return res.status(401).send({ message: "Unauthorized" });
-    }
-if(adminUser !== undefined){
 
-  next();
-}
+
+next();
 };
 
 app.post(
