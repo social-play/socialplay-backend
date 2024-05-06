@@ -274,11 +274,11 @@ const authorizeUser = async (
 
 console.log("hier am I",req.session.user);
 
-  if (!req.session.user) {
-    console.log("kein req.session.user");
+  // if (!req.session.user.userName) {
+  //   console.log("kein req.session.user");
 
-    return res.status(401).send({ message: "Unauthorized" });
-  }
+  //   return res.status(401).send({ message: "Unauthorized" });
+  // }
 
   // Überprüfen, ob ein Benutzer in der Sitzung vorhanden ist
   const anonymousUser = await Users.findOne({ userName: "anonymousUser" });
