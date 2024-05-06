@@ -281,7 +281,7 @@ const authorizeUser = async (
   const anonymousUser = await Users.findOne({ userName: "anonymousUser" });
   const adminUser= req.session.user.userName;
 
-  if(adminUser===anonymousUser){
+  if(adminUser===anonymousUser.userName){
     return res.status(401).send({message: "Unauthorized"})
   }
 
