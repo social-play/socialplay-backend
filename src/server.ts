@@ -40,6 +40,7 @@ const io = new Server(httpServer, {
   cors: {
     origin: process.env.FRONT_BASE_URL,
     methods: ["GET", "POST"],
+    credentials: true
   },
 });
 
