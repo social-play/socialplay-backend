@@ -319,7 +319,7 @@ const authorizeUser = async (
 
 app.post(
   "/gamesPost",
-  authorizeUser,
+
   async (req: express.Request, res: express.Response) => {
     const gamesPost = req.body;
     try {
@@ -332,7 +332,7 @@ app.post(
 
 app.delete(
   "/gamesPost/:id",
-  authorizeUser,
+
   async (req: express.Request, res: express.Response) => {
     const _id = req.params.id;
     try {
@@ -345,7 +345,7 @@ app.delete(
 
 app.patch(
   "/gamesPost/:id",
-  authorizeUser,
+
   async (req: express.Request, res: express.Response) => {
     const id = req.params.id;
     const gamesPost: IGamePost = req.body;
