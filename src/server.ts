@@ -272,6 +272,7 @@ const authorizeUser = async (
   next: express.NextFunction
 ) => {
 
+console.log("hier am I",req.session.user);
 
   if (!req.session.user) {
     console.log("kein req.session.user");
