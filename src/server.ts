@@ -258,24 +258,7 @@ app.get(
   }
 );
 
-const authorizeUser = async (
-  req: express.Request,
-  res: express.Response,
-  next: express.NextFunction
-) => {
 
-  const user = await Users.findOne({ userName: "anonymousUser" });
-
-
-  if (req.session.user !== user) {
-    next();
-  } else {
-
-    res.status(401).send({});
-  }
-};
-
-// andere lösung
 // const authorizeUser = async (
 //   req: express.Request,
 //   res: express.Response,
